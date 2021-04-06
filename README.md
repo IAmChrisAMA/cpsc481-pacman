@@ -24,5 +24,5 @@ overly expanded states.
 How we implemented searching was through creating a Priority Queue from util.py. This
 allowed us to check whether the current node was empty, what our next step should be,
 pushing and popping, as well as getting the final solution. The part where we struggled was
-dealing with the heuristics checking the problem and how it would be implemented in code as well
-as dealing
+dealing with the heuristics checking the problem and how it would be implemented in code. Towards
+the end we finally were able to implement the heuristics towards the expand function (getSuccessor).
