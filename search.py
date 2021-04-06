@@ -168,17 +168,24 @@ def aStarSearch(problem, heuristic=nullHeuristic):
         # remove nextstep from openstates
         nextStep = openStates.pop()
 
-        #Generate successors
-        successors = problem.getSuccessors(nextStep[0])
+        if nextStep in closedStates:
+            continue
+
 
         #if the goal state has been reached then return the path that it took to get there
         if problem.isGoalState(nextStep[0]):
             return finalPath[nextStep]
 
+        #Generate successors
+        successors = problem.getSuccessors(nextStep[0])
+
         #For each successor add its path to the dictionary final path and push it into the priority queue
         for x in successors:
             finalPath[x[0]] = finalPath[nextStep] + [x[1]]
-            openStates.push(x[0], cost_of(x, problem, heuristic))
+            cost = problem.getCostOfActions(finalPath[x[0]])
+            openStates.push(x[0], cost)
+
+        closedStates.append(nextStep)
 
 def cost_of(state, problem, heuristic=nullHeuristic):
     cost = state[2] + heuristic(state[0], problem)
