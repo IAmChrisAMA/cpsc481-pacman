@@ -23,7 +23,6 @@ class SearchProblem:
     """
     This class outlines the structure of a search problem, but doesn't implement
     any of the methods (in object-oriented terminology: an abstract class).
-
     You do not need to change anything in this class, ever.
     """
 
@@ -36,7 +35,6 @@ class SearchProblem:
     def isGoalState(self, state):
         """
           state: Search state
-
         Returns True if and only if the state is a valid goal state.
         """
         util.raiseNotDefined()
@@ -44,7 +42,6 @@ class SearchProblem:
     def getSuccessors(self, state):
         """
           state: Search state
-
         For a given state, this should return a list of triples, (successor,
         action, stepCost), where 'successor' is a successor to the current
         state, 'action' is the action required to get there, and 'stepCost' is
@@ -55,7 +52,6 @@ class SearchProblem:
     def getCostOfActions(self, actions):
         """
          actions: A list of actions to take
-
         This method returns the total cost of a particular sequence of actions.
         The sequence must be composed of legal moves.
         """
@@ -157,33 +153,32 @@ def aStarSearch(problem, heuristic=nullHeuristic):
     openStates = util.PriorityQueue()
     closedStates = []
 
-    finalPath = []
-    finalSolution = []
-
     #The state we are currently looking at
     startState = problem.getStartState()
-
     openStates.push(startState, 0)
 
+    #final path a dictionary which has the state ('A') as the term and its path ([right, left]) as its definition
+    finalPath = {
+        startState: []
+    }
+    finalSolution = []
 
     while not openStates.isEmpty():
         #find node with least cost, this is next step
         # remove nextstep from openstates
         nextStep = openStates.pop()
 
-        if problem.isGoalState(nextStep):
-            print('goal?')
-            return finalSolution
-
         #Generate successors
         successors = problem.getSuccessors(nextStep[0])
 
-        #For each successor
-        if nextStep not in closedStates:
-            closedStates.append(nextStep)
-            finalSolution.append(nextStep)
-            for x in successors:
-                openStates.push(x[0], cost_of(x, problem, heuristic))
+        #if the goal state has been reached then return the path that it took to get there
+        if problem.isGoalState(nextStep[0]):
+            return finalPath[nextStep]
+
+        #For each successor add its path to the dictionary final path and push it into the priority queue
+        for x in successors:
+            finalPath[x[0]] = finalPath[nextStep] + [x[1]]
+            openStates.push(x[0], cost_of(x, problem, heuristic))
 
 def cost_of(state, problem, heuristic=nullHeuristic):
     cost = state[2] + heuristic(state[0], problem)
