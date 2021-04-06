@@ -72,27 +72,72 @@ def tinyMazeSearch(problem):
     w = Directions.WEST
     return  [s, s, w, s, w, w, s, w]
 
+
+def baseSearchFunction(problem, data_structure):
+    """
+    Since the implementation of a Depth First Search and Breadth First Search
+    are nearly identical, we can simply switch the date structure based on the
+    order we recieve our nodes; i.e. change the direction we pop, push nodes.
+    """
+    # The path that takes us from the start node to the destination
+    answer_path = []
+
+    # Set the open_nodes data structure as either a Stack (DFS) or Queue (BFS)
+    open_nodes = data_structure()
+
+    # Add the starting state and the empty list to our open nodes
+    open_nodes.push((problem.getStartState(), answer_path))
+
+    # Initialize closed nodes to contain nothing
+    closed_nodes = []
+
+    # While there is at least one item in our open_nodes
+    while (not open_nodes.isEmpty()):
+
+        # Assign current_node and answer_path to an element from one side of the list
+        current_node, answer_path = open_nodes.pop()
+
+        # If our current node isn't closed
+        if (current_node not in closed_nodes):
+
+            # Add the current node to the set of closed nodes
+            closed_nodes.append(current_node)
+
+            # If we're at the destination
+            if (problem.isGoalState(current_node)):
+                # Return the path we used to get here
+                return answer_path
+
+            # Set successors equal to the children of the current node
+            successors = problem.getSuccessors(current_node)
+
+            # For each successor
+            for state in successors:
+
+                # Set the node, path equal to the node and path of the state (We're not concerned about the cost)
+                node, path, _ = state
+
+                # If the current node isn't in the set of closed nodes
+                if (node not in closed_nodes):
+                    # Add the node and path to the set of open nodes
+                    open_nodes.push((node, answer_path + [path]))
+
+    # Return the 'best' answer_path we could find; If we're returning here, we didn't find the destination
+    return answer_path
+
+
 def depthFirstSearch(problem):
-    """
-    Search the deepest nodes in the search tree first.
+    """Search the deepest nodes in the search tree first."""
 
-    Your search algorithm needs to return a list of actions that reaches the
-    goal. Make sure to implement a graph search algorithm.
+    # Use a stack in order to perform a Depth First Search
+    return baseSearchFunction(problem, util.Stack)
 
-    To get started, you might want to try some of these simple commands to
-    understand the search problem that is being passed in:
-
-    print("Start:", problem.getStartState())
-    print("Is the start a goal?", problem.isGoalState(problem.getStartState()))
-    print("Start's successors:", problem.getSuccessors(problem.getStartState()))
-    """
-    "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
 
 def breadthFirstSearch(problem):
     """Search the shallowest nodes in the search tree first."""
-    "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+
+    # Use a Queue in order to perform a Breadth First Search
+    return baseSearchFunction(problem, util.Queue)
 
 def uniformCostSearch(problem):
     """Search the node of least total cost first."""
@@ -108,55 +153,39 @@ def nullHeuristic(state, problem=None):
 
 def aStarSearch(problem, heuristic=nullHeuristic):
     """Search the node that has the lowest combined cost and heuristic first."""
-    #Both start as out starting state because that is the current state at the start of the problem
-    currentState = problem.getStartState()
+    #Nodes are looking at and have looked at
+    openStates = util.PriorityQueue()
+    closedStates = []
 
-    #states that are opened and possible options for the next step
-    nextStates = []
-    previouslyVisited = []
-
-    # The final path that this search will give us
     finalPath = []
     finalSolution = []
 
-    print(problem)
+    #The state we are currently looking at
+    startState = problem.getStartState()
 
-    while(problem.isGoalState(currentState) == False):
-        #Adds the current state to the final path
-        finalPath.append(currentState)
-
-        successors = problem.getSuccessors(currentState)
-
-        # Adds the successors of the current state to the possible next states
-        for x in successors:
-            if x[0] in finalPath:
-                print('passing')
-            else:
-                nextStates.append(x)
-
-        lowestCost = cost_of(nextStates[0], problem, heuristic)
-        nextStep = nextStates[0]
-        for x in nextStates:
-            if cost_of(x, problem, heuristic) < lowestCost:
-                nextStep = x
-                lowestCost = cost_of(x, problem, heuristic)
-
-        previousState = currentState
-
-        currentState = nextStep[0]
-        finalSolution.append(nextStep[1])
-        nextStates.remove(nextStep)
+    openStates.push(startState, 0)
 
 
-    #print(heuristic)
-    #print(problem)
+    while not openStates.isEmpty():
+        #find node with least cost, this is next step
+        # remove nextstep from openstates
+        nextStep = openStates.pop()
 
+        if problem.isGoalState(nextStep):
+            print('goal?')
+            return finalSolution
 
-    return finalSolution
+        #Generate successors
+        successors = problem.getSuccessors(nextStep[0])
 
+        #For each successor
+        if nextStep not in closedStates:
+            closedStates.append(nextStep)
+            finalSolution.append(nextStep)
+            for x in successors:
+                openStates.push(x[0], cost_of(x, problem, heuristic))
 
 def cost_of(state, problem, heuristic=nullHeuristic):
-
     cost = state[2] + heuristic(state[0], problem)
     return cost
 
@@ -165,3 +194,4 @@ bfs = breadthFirstSearch
 dfs = depthFirstSearch
 astar = aStarSearch
 ucs = uniformCostSearch
+
