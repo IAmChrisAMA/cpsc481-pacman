@@ -149,43 +149,38 @@ def nullHeuristic(state, problem=None):
 
 def aStarSearch(problem, heuristic=nullHeuristic):
     """Search the node that has the lowest combined cost and heuristic first."""
-    #Nodes are looking at and have looked at
+    # Nodes are looking at and have looked at
     openStates = util.PriorityQueue()
     closedStates = []
 
-    #The state we are currently looking at
+    # The state we are currently looking at
+    initialize = [problem.getStartState(), [], 0]
     startState = problem.getStartState()
-    openStates.push(startState, 0)
+    openStates.push(initialize, 0)
 
-    #final path a dictionary which has the state ('A') as the term and its path ([right, left]) as its definition
-    finalPath = {
-        startState: []
-    }
-    finalSolution = []
-
-    while not openStates.isEmpty():
-        #find node with least cost, this is next step
+    while(not openStates.isEmpty()):
+        # find node with least cost, this is next step
         # remove nextstep from openstates
-        nextStep = openStates.pop()
+        # nextStep = openStates.pop()
+        node, actions, currentCost = openStates.pop()
 
-        if nextStep in closedStates:
+        if node in closedStates:
             continue
 
+        closedStates.append(node)
 
-        #if the goal state has been reached then return the path that it took to get there
-        if problem.isGoalState(nextStep[0]):
-            return finalPath[nextStep]
+        # if the goal state has been reached then return the path that it took to get there
+        if problem.isGoalState(node):
+            return actions
 
-        #Generate successors
-        successors = problem.getSuccessors(nextStep[0])
+        # Generate successors
+        # For each successor add its path to the dictionary final path and push it into the priority queue
+        for successor in problem.getSuccessors(node):
+            state, _actions, cost = successor
+            fn = cost + currentCost
+            openStates.push((state, actions + [_actions], fn), fn + heuristic(state, problem))
 
-        #For each successor add its path to the dictionary final path and push it into the priority queue
-        for x in successors:
-            finalPath[x[0]] = finalPath[nextStep] + [x[1]]
-            cost = problem.getCostOfActions(finalPath[x[0]])
-            openStates.push(x[0], cost)
-
-        closedStates.append(nextStep)
+    return actions
 
 def cost_of(state, problem, heuristic=nullHeuristic):
     cost = state[2] + heuristic(state[0], problem)
