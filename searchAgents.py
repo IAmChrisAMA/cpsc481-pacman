@@ -288,30 +288,25 @@ class CornersProblem(search.SearchProblem):
         # Please add any code here which you would like to use
         # in initializing the problem
         "*** YOUR CODE HERE ***"
-        #sets starting state as the starting position and the corners that have not been visited
-        self.startingState = (self.startingPosition, self.corners)
+        self.startState = (self.startingPosition, self.corners)
 
     def getStartState(self):
         """
         Returns the start state (in your state space, not the full Pacman state
         space)
         """
-        "*** YOUR CODE HERE ***"
-        return self.startingState
-
+        #returns the starting state which, is the starting position with the untouched corners
+        return self.startState
 
     def isGoalState(self, state):
         """
         Returns whether this search state is a goal state of the problem.
         """
-        "*** YOUR CODE HERE ***"
-        #if the second section of the current state is empty, there are no corners missing, then that is the goal state
-        if state[1] == []:
+        #If the second section of the current state, length equals zero then, it is empty, thus all corners have been touched and the goalstate has been reached
+        if len(state[1]) == 0:
             return True
         else:
             return False
-
-
 
     def getSuccessors(self, state):
         """
@@ -323,27 +318,33 @@ class CornersProblem(search.SearchProblem):
             state, 'action' is the action required to get there, and 'stepCost'
             is the incremental cost of expanding to that successor
         """
-        print(state)
+
         successors = []
         for action in [Directions.NORTH, Directions.SOUTH, Directions.EAST, Directions.WEST]:
             # Add a successor state to the successor list if the action is legal
             # Here's a code snippet for figuring out whether a new position hits a wall:
-            x,y = state
+            x,y = state[0]
             dx, dy = Actions.directionToVector(action)
             nextx, nexty = int(x + dx), int(y + dy)
             hitsWall = self.walls[nextx][nexty]
 
-            "*** YOUR CODE HERE ***"
+            #if there was no wall hit then
             if not hitsWall:
-                notVisited = []
-                missingCorners = state[1]
-                for x in missingCorners:
-                    if x == (nextx, nexty):
+                #initiallize the corners that will still be missing after we suggest a possible successor
+                stillMissingCorners = []
+                
+                #for each corner that is missing in the current state if the suggested successor is a corner we continue
+                for corner in state[1]:
+                    if(nextx, nexty) == corner:
                         continue
-                    notVisited.append(x)
-                successors.append(((nextx, nexty), tuple(notVisited), action, 1))
+                    #if the successor is not a corner we append it to the still missing corners
+                    stillMissingCorners.append(corner)
+                    
+                #Finally we append the successor to the successors option
+                successors.append((((nextx, nexty), tuple(stillMissingCorners)), action, 1))
 
         self._expanded += 1 # DO NOT CHANGE
+        #Return the successors
         return successors
 
     def getCostOfActions(self, actions):
